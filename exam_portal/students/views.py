@@ -390,6 +390,8 @@ def exam_result(request, exam_id):
 
     # ... (other imports and views remain unchanged until take_exam)
 
+# ... (other imports and views unchanged)
+
 def take_exam(request, exam_id):
     if 'student_id' not in request.session:
         return redirect('student_login')
@@ -404,6 +406,14 @@ def take_exam(request, exam_id):
         return redirect('exam_result', exam_id=exam_id)
 
     questions = Question.objects.filter(exam=exam)
+
+    # Check for termination flag on every request
+    if request.session.get(f'exam_{exam_id}_terminate'):
+        return render(request, 'students/exam_terminated.html', {
+            'student': student,
+            'exam': exam,
+            'reason': request.session.get(f'exam_{exam_id}_terminate_reason', 'Unknown')
+        })
 
     if request.method == 'POST':
         if request.session.get(f'exam_{exam_id}_face_mismatch'):
@@ -432,33 +442,20 @@ def take_exam(request, exam_id):
         del request.session[f'exam_{exam_id}_snapshots']
         if f'exam_{exam_id}_face_mismatch' in request.session:
             del request.session[f'exam_{exam_id}_face_mismatch']
+        if f'exam_{exam_id}_terminate' in request.session:
+            del request.session[f'exam_{exam_id}_terminate']
+        if f'exam_{exam_id}_terminate_reason' in request.session:
+            del request.session[f'exam_{exam_id}_terminate_reason']
         return redirect('exam_result', exam_id=exam_id)
 
     request.session[f'exam_{exam_id}_snapshots'] = []
     request.session[f'exam_{exam_id}_face_mismatch'] = False
+    request.session[f'exam_{exam_id}_terminate'] = False
     return render(request, 'students/take_exam.html', {
         'student': student,
         'exam': exam,
         'questions': questions,
         'time_limit': exam.time_limit * 60
-    })
-
-def exam_result(request, exam_id):
-    if 'student_id' not in request.session:
-        return redirect('student_login')
-    student = Student.objects.get(id=request.session['student_id'])
-    
-    try:
-        exam = Exam.objects.get(id=exam_id, course=student.course, department=student.department)
-    except Exam.DoesNotExist:
-        return redirect('student_exam_list')
-
-    submission = StudentExamSubmission.objects.filter(student=student, exam=exam).first()
-    score = submission.score if submission else 'Not submitted'
-    return render(request, 'students/exam_result.html', {
-        'student': student,
-        'exam': exam,
-        'score': score
     })
 
 @csrf_exempt
@@ -481,6 +478,8 @@ def save_snapshot(request, exam_id):
 
     if not snapshot_encodings:
         request.session[f'exam_{exam_id}_face_mismatch'] = True
+        request.session[f'exam_{exam_id}_terminate'] = True
+        request.session[f'exam_{exam_id}_terminate_reason'] = 'No face detected'
         return JsonResponse({'status': 'error', 'message': 'No face detected'})
 
     snapshot_encoding = snapshot_encodings[0]
@@ -504,6 +503,8 @@ def save_snapshot(request, exam_id):
     matches = face_recognition.compare_faces(stored_encodings, snapshot_encoding, tolerance=0.45)
     if not any(matches):
         request.session[f'exam_{exam_id}_face_mismatch'] = True
+        request.session[f'exam_{exam_id}_terminate'] = True
+        request.session[f'exam_{exam_id}_terminate_reason'] = 'Face does not match registered photos'
         return JsonResponse({'status': 'error', 'message': 'Face does not match registered photos'})
 
     # Cross-check against other users
@@ -530,6 +531,8 @@ def save_snapshot(request, exam_id):
         if any(other_matches):
             matched_users = [user_id for (user_id, _), match in zip(other_encodings, other_matches) if match]
             request.session[f'exam_{exam_id}_face_mismatch'] = True
+            request.session[f'exam_{exam_id}_terminate'] = True
+            request.session[f'exam_{exam_id}_terminate_reason'] = f'Face matches another user: {", ".join(matched_users)}'
             return JsonResponse({'status': 'error', 'message': f'Face matches another user: {", ".join(matched_users)}'})
 
     snapshots = request.session.get(f'exam_{exam_id}_snapshots', [])

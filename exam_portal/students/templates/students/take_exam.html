@@ -60,10 +60,10 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-
+    
         // Debug: Check the value
         console.log("Time Left Initial Value:", timeLeft);
-
+    
         // Start webcam
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
@@ -75,7 +75,7 @@
                 alert('Webcam access denied. Exam requires face verification.');
                 submitBtn.disabled = true;
             });
-
+    
         // Capture snapshot every 10 seconds
         function captureSnapshot() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -91,13 +91,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'error') {
-                    alert('Face verification failed: ' + data.message);
-                    submitBtn.disabled = true;
+                    alert('Exam terminated: ' + data.message);
+                    window.location.href = "{% url 'student_exam_list' %}";  // Redirect on failure
                 }
             });
         }
         setInterval(captureSnapshot, 10000);
-
+    
         // Timer
         const timer = setInterval(() => {
             timeLeft--;
