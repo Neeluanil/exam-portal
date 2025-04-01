@@ -23,33 +23,43 @@
             <canvas id="canvas"></canvas>
         </div>
 
-        <form method="POST" id="examForm">
-            {% csrf_token %}
-            {% for question in questions %}
+        {% if question %}
+            <form method="POST" id="examForm">
+                {% csrf_token %}
                 <div class="card mt-3">
                     <div class="card-body">
-                        <h5>{{ question.text }}</h5>
+                        <h5>{{ question.text }} (Question {{ current_index|add:1 }} of {{ total_questions }})</h5>
                         <div class="form-check">
-                            <input type="radio" name="question_{{ question.id }}" value="A" class="form-check-input">
+                            <input type="radio" name="question_{{ question.id }}" value="A" class="form-check-input" {% if current_answer == "A" %}checked{% endif %}>
                             <label class="form-check-label">{{ question.option_a }}</label>
                         </div>
                         <div class="form-check">
-                            <input type="radio" name="question_{{ question.id }}" value="B" class="form-check-input">
+                            <input type="radio" name="question_{{ question.id }}" value="B" class="form-check-input" {% if current_answer == "B" %}checked{% endif %}>
                             <label class="form-check-label">{{ question.option_b }}</label>
                         </div>
                         <div class="form-check">
-                            <input type="radio" name="question_{{ question.id }}" value="C" class="form-check-input">
+                            <input type="radio" name="question_{{ question.id }}" value="C" class="form-check-input" {% if current_answer == "C" %}checked{% endif %}>
                             <label class="form-check-label">{{ question.option_c }}</label>
                         </div>
                         <div class="form-check">
-                            <input type="radio" name="question_{{ question.id }}" value="D" class="form-check-input">
+                            <input type="radio" name="question_{{ question.id }}" value="D" class="form-check-input" {% if current_answer == "D" %}checked{% endif %}>
                             <label class="form-check-label">{{ question.option_d }}</label>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
-            <button type="submit" id="submitBtn" class="btn btn-primary mt-3">Submit Exam</button>
-        </form>
+                <div class="mt-3">
+                    {% if current_index > 0 %}
+                        <button type="submit" name="action" value="prev" class="btn btn-secondary">Previous</button>
+                    {% endif %}
+                    {% if current_index < total_questions|add:-1 %}
+                        <button type="submit" name="action" value="next" class="btn btn-primary">Next</button>
+                    {% endif %}
+                    <button type="submit" name="action" value="submit" id="submitBtn" class="btn btn-success">Submit Exam</button>
+                </div>
+            </form>
+        {% else %}
+            <p>No questions available for this exam.</p>
+        {% endif %}
     </div>
 
     <script>
@@ -60,11 +70,9 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-    
-        // Debug: Check the value
+
         console.log("Time Left Initial Value:", timeLeft);
-    
-        // Start webcam
+
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 video.srcObject = stream;
@@ -75,8 +83,7 @@
                 alert('Webcam access denied. Exam requires face verification.');
                 submitBtn.disabled = true;
             });
-    
-        // Capture snapshot every 10 seconds
+
         function captureSnapshot() {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const snapshot = canvas.toDataURL('image/jpeg');
@@ -92,13 +99,12 @@
             .then(data => {
                 if (data.status === 'error') {
                     alert('Exam terminated: ' + data.message);
-                    window.location.href = "{% url 'student_exam_list' %}";  // Redirect on failure
+                    window.location.href = "{% url 'student_exam_list' %}";
                 }
             });
         }
         setInterval(captureSnapshot, 10000);
-    
-        // Timer
+
         const timer = setInterval(() => {
             timeLeft--;
             timerElement.textContent = timeLeft;

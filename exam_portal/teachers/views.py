@@ -223,6 +223,24 @@ def teacher_dashboard(request):
     exams = Exam.objects.filter(teacher=teacher)
     return render(request, 'teachers/dashboard.html', {'teacher': teacher, 'exams': exams})
 
+def delete_exam(request, exam_id):
+    if 'teacher_id' not in request.session:
+        return redirect('teacher_login')
+    teacher = Teacher.objects.get(id=request.session['teacher_id'])
+    try:
+        exam = Exam.objects.get(id=exam_id, teacher=teacher)
+        # Delete related student submissions and questions first
+        StudentExamSubmission.objects.filter(exam=exam).delete()
+        Question.objects.filter(exam=exam).delete()
+        exam.delete()
+        return redirect('teacher_dashboard')
+    except Exam.DoesNotExist:
+        return render(request, 'teachers/dashboard.html', {
+            'teacher': teacher,
+            'exams': Exam.objects.filter(teacher=teacher),
+            'error': 'Exam not found or you do not have permission to delete it.'
+        })
+
 def create_exam(request):
     if 'teacher_id' not in request.session:
         return redirect('teacher_login')
@@ -296,17 +314,29 @@ def view_exam_results(request, exam_id):
     if 'teacher_id' not in request.session:
         return redirect('teacher_login')
     teacher = Teacher.objects.get(id=request.session['teacher_id'])
-    
     try:
         exam = Exam.objects.get(id=exam_id, teacher=teacher)
-    except Exam.DoesNotExist:
-        return redirect('teacher_dashboard')
+        submissions = StudentExamSubmission.objects.filter(exam=exam).select_related('student')
+        questions = Question.objects.filter(exam=exam)
 
-    # Get all submissions for this exam
-    submissions = StudentExamSubmission.objects.filter(exam=exam).select_related('student')
-    
-    return render(request, 'teachers/exam_results.html', {
-        'teacher': teacher,
-        'exam': exam,
-        'submissions': submissions
-    })
+        # Prepare detailed results
+        results = []
+        for submission in submissions:
+            results.append({
+                'student': submission.student,
+                'score': submission.score,
+                'answers': submission.answers  # Use the stored answers from JSONField
+            })
+
+        return render(request, 'teachers/exam_results.html', {
+            'teacher': teacher,
+            'exam': exam,
+            'questions': questions,
+            'results': results
+        })
+    except Exam.DoesNotExist:
+        return render(request, 'teachers/dashboard.html', {
+            'teacher': teacher,
+            'exams': Exam.objects.filter(teacher=teacher),
+            'error': 'Exam not found or you do not have permission to view its results.'
+        })

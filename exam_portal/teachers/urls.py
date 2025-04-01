@@ -10,5 +10,6 @@ urlpatterns = [
     path('add-questions/<int:exam_id>/', views.add_questions, name='add_questions'),
     path('logout/', views.teacher_logout, name='teacher_logout'),
     path('exam/<int:exam_id>/results/', views.view_exam_results, name='view_exam_results'),
+    path('exam/delete/<int:exam_id>/', views.delete_exam, name='delete_exam'),
     # Add more paths later
 ]

@@ -22,6 +22,7 @@ class StudentExamSubmission(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     score = models.IntegerField()
     submitted_at = models.DateTimeField(auto_now_add=True)
+    answers = models.JSONField(default=dict)
 
     class Meta:
         unique_together = ('student', 'exam')  # Prevent re-taking same exam

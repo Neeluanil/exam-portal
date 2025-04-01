@@ -13,14 +13,22 @@
         <p><strong>Teacher ID:</strong> {{ teacher.teacher_id }}</p>
         <p><strong>Email:</strong> {{ teacher.email }}</p>
         <a href="{% url 'create_exam' %}" class="btn btn-success mb-3">Create New Exam</a>
+        
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
         <h3>Your Exams</h3>
         {% if exams %}
             <ul class="list-group">
                 {% for exam in exams %}
-                    <li class="list-group-item">
-                        {{ exam }} ({{ exam.time_limit }} mins) - 
-                        <a href="{% url 'add_questions' exam.id %}" class="btn btn-sm btn-primary">Add Questions</a>
-                        <a href="{% url 'view_exam_results' exam.id %}" class="btn btn-info btn-sm">View Results</a>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ exam }} ({{ exam.time_limit }} mins)
+                        <div>
+                            <a href="{% url 'add_questions' exam.id %}" class="btn btn-sm btn-primary">Add Questions</a>
+                            <a href="{% url 'view_exam_results' exam.id %}" class="btn btn-info btn-sm">View Results</a>
+                            <a href="{% url 'delete_exam' exam.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this exam?');">Delete</a>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>

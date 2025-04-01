@@ -392,6 +392,12 @@ def exam_result(request, exam_id):
 
 # ... (other imports and views unchanged)
 
+# ... (other imports and views unchanged)
+
+# ... (other imports and views unchanged)
+
+# ... (other imports and views unchanged)
+
 def take_exam(request, exam_id):
     if 'student_id' not in request.session:
         return redirect('student_login')
@@ -406,8 +412,9 @@ def take_exam(request, exam_id):
         return redirect('exam_result', exam_id=exam_id)
 
     questions = Question.objects.filter(exam=exam)
+    total_questions = questions.count()
 
-    # Check for termination flag on every request
+    # Check for termination
     if request.session.get(f'exam_{exam_id}_terminate'):
         return render(request, 'students/exam_terminated.html', {
             'student': student,
@@ -415,46 +422,81 @@ def take_exam(request, exam_id):
             'reason': request.session.get(f'exam_{exam_id}_terminate_reason', 'Unknown')
         })
 
+    # Initialize session data
+    if f'exam_{exam_id}_answers' not in request.session:
+        request.session[f'exam_{exam_id}_answers'] = {}
+    if f'exam_{exam_id}_current_question' not in request.session:
+        request.session[f'exam_{exam_id}_current_question'] = 0
+    if f'exam_{exam_id}_snapshots' not in request.session:  # Add this
+        request.session[f'exam_{exam_id}_snapshots'] = []    
+
+    current_index = request.session[f'exam_{exam_id}_current_question']
+    answers = request.session[f'exam_{exam_id}_answers']
+
     if request.method == 'POST':
-        if request.session.get(f'exam_{exam_id}_face_mismatch'):
-            return render(request, 'students/take_exam.html', {
-                'student': student,
-                'exam': exam,
-                'questions': questions,
-                'time_limit': exam.time_limit * 60,
-                'error': 'Face verification failed during exam. Submission denied.'
-            })
+        action = request.POST.get('action')
+        answer = request.POST.get(f'question_{questions[current_index].id}')
 
-        answers = {}
-        for question in questions:
-            answer = request.POST.get(f'question_{question.id}')
-            answers[question.id] = answer
+        # Save answer
+        if answer:
+            answers[str(questions[current_index].id)] = answer
+            request.session[f'exam_{exam_id}_answers'] = answers
 
-        score = 0
-        for question in questions:
-            submitted_answer = answers.get(question.id)
-            if submitted_answer == question.correct_answer:
-                score += question.marks_correct
-            elif submitted_answer:
-                score -= question.marks_wrong
+        if action == 'next' and current_index < total_questions - 1:
+            request.session[f'exam_{exam_id}_current_question'] = current_index + 1
+        elif action == 'prev' and current_index > 0:
+            request.session[f'exam_{exam_id}_current_question'] = current_index - 1
+        elif action == 'submit':
+            if request.session.get(f'exam_{exam_id}_face_mismatch'):
+                current_question = questions[current_index] if questions else None
+                current_answer = answers.get(str(current_question.id)) if current_question else None
+                return render(request, 'students/take_exam.html', {
+                    'student': student,
+                    'exam': exam,
+                    'question': current_question,
+                    'current_answer': current_answer,
+                    'current_index': current_index,
+                    'total_questions': total_questions,
+                    'time_limit': exam.time_limit * 60,
+                    'error': 'Face verification failed during exam. Submission denied.'
+                })
 
-        StudentExamSubmission.objects.create(student=student, exam=exam, score=score)
-        del request.session[f'exam_{exam_id}_snapshots']
-        if f'exam_{exam_id}_face_mismatch' in request.session:
-            del request.session[f'exam_{exam_id}_face_mismatch']
-        if f'exam_{exam_id}_terminate' in request.session:
-            del request.session[f'exam_{exam_id}_terminate']
-        if f'exam_{exam_id}_terminate_reason' in request.session:
-            del request.session[f'exam_{exam_id}_terminate_reason']
-        return redirect('exam_result', exam_id=exam_id)
+            score = 0
+            for question in questions:
+                submitted_answer = answers.get(str(question.id))
+                if submitted_answer == question.correct_answer:
+                    score += question.marks_correct
+                elif submitted_answer:
+                    score -= question.marks_wrong
 
-    request.session[f'exam_{exam_id}_snapshots'] = []
-    request.session[f'exam_{exam_id}_face_mismatch'] = False
-    request.session[f'exam_{exam_id}_terminate'] = False
+            StudentExamSubmission.objects.create(student=student, exam=exam, score=score, answers=answers)
+            
+            # Safely clean up session keys
+            session_keys = [
+                f'exam_{exam_id}_snapshots',
+                f'exam_{exam_id}_answers',
+                f'exam_{exam_id}_current_question',
+                f'exam_{exam_id}_face_mismatch',
+                f'exam_{exam_id}_terminate',
+                f'exam_{exam_id}_terminate_reason'
+            ]
+            for key in session_keys:
+                if key in request.session:
+                    del request.session[key]
+            return redirect('exam_result', exam_id=exam_id)
+
+        request.session.modified = True
+
+    # Render current question with its answer
+    current_question = questions[current_index] if questions else None
+    current_answer = answers.get(str(current_question.id)) if current_question else None
     return render(request, 'students/take_exam.html', {
         'student': student,
         'exam': exam,
-        'questions': questions,
+        'question': current_question,
+        'current_answer': current_answer,
+        'current_index': current_index,
+        'total_questions': total_questions,
         'time_limit': exam.time_limit * 60
     })
 
