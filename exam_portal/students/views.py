@@ -232,7 +232,6 @@ def student_exam_list(request):
     return render(request, 'students/exam_list.html', {'student': student, 'exams': exams})
 
 # ... (other imports remain unchanged)
-
 def take_exam(request, exam_id):
     if 'student_id' not in request.session:
         return redirect('student_login')
@@ -244,172 +243,7 @@ def take_exam(request, exam_id):
         return redirect('student_exam_list')
 
     if StudentExamSubmission.objects.filter(student=student, exam=exam).exists():
-        return redirect('exam_result', exam_id=exam_id)
-
-    questions = Question.objects.filter(exam=exam)
-
-    if request.method == 'POST':
-        # Process answers
-        answers = {}
-        for question in questions:
-            answer = request.POST.get(f'question_{question.id}')
-            answers[question.id] = answer
-
-        # Get face snapshots from session (set by JS via AJAX, see template)
-        face_snapshots = request.session.get(f'exam_{exam_id}_snapshots', [])
-        if not face_snapshots:
-            return render(request, 'students/take_exam.html', {
-                'student': student,
-                'exam': exam,
-                'questions': questions,
-                'time_limit': exam.time_limit * 60,
-                'error': 'No face snapshots captured. Please enable webcam.'
-            })
-
-        # Load student’s registered photos
-        stored_images = [
-            face_recognition.load_image_file(student.photo1.path),
-            face_recognition.load_image_file(student.photo2.path),
-            face_recognition.load_image_file(student.photo3.path),
-        ]
-        stored_encodings = []
-        for i, img in enumerate(stored_images, 1):
-            encodings = face_recognition.face_encodings(img)
-            if encodings:
-                stored_encodings.append(encodings[0])
-            else:
-                print(f"Warning: No face in student photo {i} for {student.register_no}")
-
-        if not stored_encodings:
-            return render(request, 'students/take_exam.html', {
-                'student': student,
-                'exam': exam,
-                'questions': questions,
-                'time_limit': exam.time_limit * 60,
-                'error': 'No valid face data in your profile. Contact admin.'
-            })
-
-        # Verify snapshots
-        all_teachers = Teacher.objects.all()
-        all_students = Student.objects.exclude(id=student.id)
-        other_encodings = []
-        for other_student in all_students:
-            for photo_field in [other_student.photo1, other_student.photo2, other_student.photo3]:
-                if photo_field:
-                    img = face_recognition.load_image_file(photo_field.path)
-                    encodings = face_recognition.face_encodings(img)
-                    if encodings:
-                        other_encodings.append((other_student.register_no, encodings[0]))
-        for teacher in all_teachers:
-            for photo_field in [teacher.photo1, teacher.photo2, teacher.photo3]:
-                if photo_field:
-                    img = face_recognition.load_image_file(photo_field.path)
-                    encodings = face_recognition.face_encodings(img)
-                    if encodings:
-                        other_encodings.append((teacher.teacher_id, encodings[0]))
-
-        face_verified = True
-        mismatched_users = []
-        for snapshot_data in face_snapshots:
-            format, imgstr = snapshot_data.split(';base64,')
-            data = base64.b64decode(imgstr)
-            snapshot_image = Image.open(BytesIO(data))
-            snapshot_np = np.array(snapshot_image)
-            snapshot_encodings = face_recognition.face_encodings(snapshot_np)
-
-            if not snapshot_encodings:
-                face_verified = False
-                break
-            snapshot_encoding = snapshot_encodings[0]
-
-            # Check against student’s photos
-            matches = face_recognition.compare_faces(stored_encodings, snapshot_encoding, tolerance=0.45)
-            if not any(matches):
-                face_verified = False
-                break
-
-            # Cross-check against other users
-            if other_encodings:
-                other_matches = face_recognition.compare_faces([enc for _, enc in other_encodings], snapshot_encoding, tolerance=0.45)
-                matched_users = [user_id for (user_id, _), match in zip(other_encodings, other_matches) if match]
-                if matched_users:
-                    face_verified = False
-                    mismatched_users.extend(matched_users)
-                    break
-
-        if not face_verified:
-            error_msg = 'Face verification failed.'
-            if mismatched_users:
-                error_msg += f' Face matched other users: {", ".join(mismatched_users)}.'
-            return render(request, 'students/take_exam.html', {
-                'student': student,
-                'exam': exam,
-                'questions': questions,
-                'time_limit': exam.time_limit * 60,
-                'error': error_msg
-            })
-
-        # Calculate score if face verified
-        score = 0
-        for question in questions:
-            submitted_answer = answers.get(question.id)
-            if submitted_answer == question.correct_answer:
-                score += question.marks_correct
-            elif submitted_answer:
-                score -= question.marks_wrong
-
-        StudentExamSubmission.objects.create(student=student, exam=exam, score=score)
-        del request.session[f'exam_{exam_id}_snapshots']  # Clean up
-        return redirect('exam_result', exam_id=exam_id)
-
-    # Clear previous snapshots on GET
-    request.session[f'exam_{exam_id}_snapshots'] = []
-    return render(request, 'students/take_exam.html', {
-        'student': student,
-        'exam': exam,
-        'questions': questions,
-        'time_limit': exam.time_limit * 60
-    })
-
-def exam_result(request, exam_id):
-    if 'student_id' not in request.session:
-        return redirect('student_login')
-    student = Student.objects.get(id=request.session['student_id'])
-    
-    try:
-        exam = Exam.objects.get(id=exam_id, course=student.course, department=student.department)
-    except Exam.DoesNotExist:
-        return redirect('student_exam_list')
-
-    score = request.session.get(f'exam_{exam_id}_score', 'Not submitted')
-    return render(request, 'students/exam_result.html', {
-        'student': student,
-        'exam': exam,
-        'score': score
-    })
-
-    # ... (other imports and views remain unchanged until take_exam)
-
-# ... (other imports and views unchanged)
-
-# ... (other imports and views unchanged)
-
-# ... (other imports and views unchanged)
-
-# ... (other imports and views unchanged)
-
-def take_exam(request, exam_id):
-    if 'student_id' not in request.session:
-        return redirect('student_login')
-    student = Student.objects.get(id=request.session['student_id'])
-    
-    try:
-        exam = Exam.objects.get(id=exam_id, course=student.course, department=student.department)
-    except Exam.DoesNotExist:
-        return redirect('student_exam_list')
-
-    if StudentExamSubmission.objects.filter(student=student, exam=exam).exists():
-        return redirect('exam_result', exam_id=exam_id)
+        return redirect('exam_result_detail', exam_id=exam_id)  # Redirect to detailed results if submitted
 
     questions = Question.objects.filter(exam=exam)
     total_questions = questions.count()
@@ -427,8 +261,8 @@ def take_exam(request, exam_id):
         request.session[f'exam_{exam_id}_answers'] = {}
     if f'exam_{exam_id}_current_question' not in request.session:
         request.session[f'exam_{exam_id}_current_question'] = 0
-    if f'exam_{exam_id}_snapshots' not in request.session:  # Add this
-        request.session[f'exam_{exam_id}_snapshots'] = []    
+    if f'exam_{exam_id}_snapshots' not in request.session:
+        request.session[f'exam_{exam_id}_snapshots'] = []
 
     current_index = request.session[f'exam_{exam_id}_current_question']
     answers = request.session[f'exam_{exam_id}_answers']
@@ -447,7 +281,55 @@ def take_exam(request, exam_id):
         elif action == 'prev' and current_index > 0:
             request.session[f'exam_{exam_id}_current_question'] = current_index - 1
         elif action == 'submit':
-            if request.session.get(f'exam_{exam_id}_face_mismatch'):
+            # Face verification
+            face_snapshots = request.session.get(f'exam_{exam_id}_snapshots', [])
+            if not face_snapshots:
+                current_question = questions[current_index] if questions else None
+                current_answer = answers.get(str(current_question.id)) if current_question else None
+                return render(request, 'students/take_exam.html', {
+                    'student': student,
+                    'exam': exam,
+                    'question': current_question,
+                    'current_answer': current_answer,
+                    'current_index': current_index,
+                    'total_questions': total_questions,
+                    'time_limit': exam.time_limit * 60,
+                    'error': 'No face snapshots captured. Please enable webcam.'
+                })
+
+            stored_images = [
+                face_recognition.load_image_file(student.photo1.path),
+                face_recognition.load_image_file(student.photo2.path),
+                face_recognition.load_image_file(student.photo3.path),
+            ]
+            stored_encodings = [enc[0] for img in stored_images for enc in face_recognition.face_encodings(img) if enc]
+            if not stored_encodings:
+                current_question = questions[current_index] if questions else None
+                current_answer = answers.get(str(current_question.id)) if current_question else None
+                return render(request, 'students/take_exam.html', {
+                    'student': student,
+                    'exam': exam,
+                    'question': current_question,
+                    'current_answer': current_answer,
+                    'current_index': current_index,
+                    'total_questions': total_questions,
+                    'time_limit': exam.time_limit * 60,
+                    'error': 'No valid face data in your profile. Contact admin.'
+                })
+
+            face_verified = True
+            for snapshot_data in face_snapshots:
+                format, imgstr = snapshot_data.split(';base64,')
+                data = base64.b64decode(imgstr)
+                snapshot_image = Image.open(BytesIO(data))
+                snapshot_np = np.array(snapshot_image)
+                snapshot_encodings = face_recognition.face_encodings(snapshot_np)
+                if not snapshot_encodings or not any(face_recognition.compare_faces(stored_encodings, snapshot_encodings[0], tolerance=0.45)):
+                    face_verified = False
+                    request.session[f'exam_{exam_id}_face_mismatch'] = True
+                    break
+
+            if not face_verified or request.session.get(f'exam_{exam_id}_face_mismatch'):
                 current_question = questions[current_index] if questions else None
                 current_answer = answers.get(str(current_question.id)) if current_question else None
                 return render(request, 'students/take_exam.html', {
@@ -461,6 +343,7 @@ def take_exam(request, exam_id):
                     'error': 'Face verification failed during exam. Submission denied.'
                 })
 
+            # Calculate score and save submission
             score = 0
             for question in questions:
                 submitted_answer = answers.get(str(question.id))
@@ -469,9 +352,14 @@ def take_exam(request, exam_id):
                 elif submitted_answer:
                     score -= question.marks_wrong
 
-            StudentExamSubmission.objects.create(student=student, exam=exam, score=score, answers=answers)
+            StudentExamSubmission.objects.create(
+                student=student,
+                exam=exam,
+                score=score,
+                answers=answers
+            )
             
-            # Safely clean up session keys
+            # Clean up session
             session_keys = [
                 f'exam_{exam_id}_snapshots',
                 f'exam_{exam_id}_answers',
@@ -483,11 +371,11 @@ def take_exam(request, exam_id):
             for key in session_keys:
                 if key in request.session:
                     del request.session[key]
-            return redirect('exam_result', exam_id=exam_id)
+            return redirect('exam_result_detail', exam_id=exam_id)  # Updated redirect
 
         request.session.modified = True
 
-    # Render current question with its answer
+    # Render current question
     current_question = questions[current_index] if questions else None
     current_answer = answers.get(str(current_question.id)) if current_question else None
     return render(request, 'students/take_exam.html', {
@@ -499,6 +387,34 @@ def take_exam(request, exam_id):
         'total_questions': total_questions,
         'time_limit': exam.time_limit * 60
     })
+
+def exam_result(request, exam_id):
+    if 'student_id' not in request.session:
+        return redirect('student_login')
+    student = Student.objects.get(id=request.session['student_id'])
+    try:
+        submission = StudentExamSubmission.objects.get(student=student, exam_id=exam_id)
+        return render(request, 'students/exam_result.html', {
+            'student': student,
+            'submission': submission
+        })
+    except StudentExamSubmission.DoesNotExist:
+        return redirect('student_exam_list')
+
+def exam_result_detail(request, exam_id):
+    if 'student_id' not in request.session:
+        return redirect('student_login')
+    student = Student.objects.get(id=request.session['student_id'])
+    try:
+        submission = StudentExamSubmission.objects.get(student=student, exam_id=exam_id)
+        questions = Question.objects.filter(exam=submission.exam)
+        return render(request, 'students/exam_result_detail.html', {
+            'student': student,
+            'submission': submission,
+            'questions': questions
+        })
+    except StudentExamSubmission.DoesNotExist:
+        return redirect('student_exam_list')
 
 @csrf_exempt
 def save_snapshot(request, exam_id):
