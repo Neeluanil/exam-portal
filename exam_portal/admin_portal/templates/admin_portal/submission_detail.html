@@ -1,0 +1,77 @@
+{% load exam_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submission Details - {{ submission.exam.course }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Submission Details: {{ submission.exam.course }} - {{ submission.exam.department }}</h2>
+        <p><strong>Student:</strong> {{ submission.student.name }} ({{ submission.student.register_no }})</p>
+        <p><strong>Score:</strong> {{ submission.score }}</p>
+        <p><strong>Submitted At:</strong> {{ submission.submitted_at }}</p>
+        <a href="{% url 'monitor_exams' %}" class="btn btn-primary mb-3">Back to Exam Monitoring</a>
+
+        {% if questions %}
+            <h3>Student Answers</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Student Answer</th>
+                        <th>Correct Answer</th>
+                        <th>Result</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions %}
+                        <tr>
+                            <td>{{ question.text }}</td>
+                            <td>{{ submission.answers|get_item:question.id|get_item:'answer'|default:'Not Answered' }}</td>
+                            <td>{{ question.correct_answer }}</td>
+                            <td>
+                                {% if submission.answers|get_item:question.id|get_item:'answer' == question.correct_answer %}
+                                    <span class="text-success">Correct</span>
+                                {% elif submission.answers|get_item:question.id|get_item:'answer' %}
+                                    <span class="text-danger">Wrong</span>
+                                {% else %}
+                                    <span class="text-muted">Not Answered</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ submission.answers|get_item:question.id|get_item:'marks' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No questions found for this exam.</p>
+        {% endif %}
+
+        {% if snapshots %}
+            <h3>Face Snapshots</h3>
+            <div class="row">
+                {% for snapshot in snapshots %}
+                    <div class="col-md-4 mb-3">
+                        <img src="{{ snapshot.data }}" class="img-fluid" alt="Exam Snapshot" style="max-height: 200px;">
+                        <p class="text-center mt-2">
+                            {% if snapshot.result == "Match" %}
+                                <span class="text-success">{{ snapshot.result }}</span>
+                            {% elif snapshot.result == "No Match" %}
+                                <span class="text-danger">{{ snapshot.result }}</span>
+                            {% else %}
+                                <span class="text-warning">{{ snapshot.result }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No snapshots captured during this exam.</p>
+        {% endif %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
