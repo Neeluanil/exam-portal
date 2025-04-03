@@ -345,18 +345,27 @@ def take_exam(request, exam_id):
 
             # Calculate score and save submission
             score = 0
+            detailed_answers = {}
             for question in questions:
                 submitted_answer = answers.get(str(question.id))
                 if submitted_answer == question.correct_answer:
+                    marks = question.marks_correct
                     score += question.marks_correct
                 elif submitted_answer:
+                    marks = -question.marks_wrong
                     score -= question.marks_wrong
+                else:
+                    marks = 0
+                detailed_answers[str(question.id)] = {
+                    'answer': submitted_answer,
+                    'marks': marks
+                }    
 
             StudentExamSubmission.objects.create(
                 student=student,
                 exam=exam,
                 score=score,
-                answers=answers
+                answers=detailed_answers
             )
             
             # Clean up session

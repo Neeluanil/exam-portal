@@ -22,6 +22,7 @@
                         <th>Your Answer</th>
                         <th>Correct Answer</th>
                         <th>Result</th>
+                        <th>Marks</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,14 +32,15 @@
                             <td>{{ submission.answers|get_item:question.id|default:'Not Answered' }}</td>
                             <td>{{ question.correct_answer }}</td>
                             <td>
-                                {% if submission.answers|get_item:question.id == question.correct_answer %}
+                                {% if submission.answers|get_item:question.id|get_item:'answer' == question.correct_answer %}
                                     <span class="text-success">Correct</span>
-                                {% elif submission.answers|get_item:question.id %}
+                                {% elif submission.answers|get_item:question.id|get_item:'answer' %}
                                     <span class="text-danger">Wrong</span>
                                 {% else %}
                                     <span class="text-muted">Not Answered</span>
                                 {% endif %}
                             </td>
+                            <td>{{ submission.answers|get_item:question.id|get_item:'marks' }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
