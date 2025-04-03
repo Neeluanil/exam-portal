@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Admin Dashboard</h2>
+        <p>Welcome, {{ user.username }}!</p>
+        <div class="list-group">
+            <a href="{% url 'approve_users' %}" class="list-group-item list-group-item-action">Approve Users</a>
+            <a href="{% url 'monitor_exams' %}" class="list-group-item list-group-item-action">Monitor Exams</a>
+            <a href="{% url 'admin:logout' %}" class="list-group-item list-group-item-action text-danger">Logout</a>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Approve Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Approve Users</h2>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mb-3">Back to Dashboard</a>
+        
+        <form method="post">
+            {% csrf_token %}
+            <h3>Unapproved Students</h3>
+            {% if students %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Name</th>
+                            <th>Register No</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td><input type="checkbox" name="student_ids" value="{{ student.id }}"></td>
+                                <td>{{ student.name }}</td>
+                                <td>{{ student.register_no }}</td>
+                                <td>{{ student.email }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No students pending approval.</p>
+            {% endif %}
+
+            <h3>Unapproved Teachers</h3>
+            {% if teachers %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Name</th>
+                            <th>Teacher ID</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                            <tr>
+                                <td><input type="checkbox" name="teacher_ids" value="{{ teacher.id }}"></td>
+                                <td>{{ teacher.name }}</td>
+                                <td>{{ teacher.teacher_id }}</td>
+                                <td>{{ teacher.email }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No teachers pending approval.</p>
+            {% endif %}
+
+            {% if students or teachers %}
+                <button type="submit" class="btn btn-success">Approve Selected</button>
+            {% endif %}
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
