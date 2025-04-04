@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import JSONField
 from teachers.models import Exam
 
 class Student(models.Model):
@@ -22,7 +23,8 @@ class StudentExamSubmission(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     score = models.IntegerField()
     submitted_at = models.DateTimeField(auto_now_add=True)
-    answers = models.JSONField(default=dict)
+    answers = JSONField(default=dict)  # Keeps detailed answers (e.g., {"1": {"answer": "A", "marks": 2}})
+    snapshots = JSONField(default=list)  # Add this for Base64 snapshots
 
     class Meta:
         unique_together = ('student', 'exam')  # Prevent re-taking same exam
