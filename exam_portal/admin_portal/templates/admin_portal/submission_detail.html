@@ -12,6 +12,19 @@
         <p><strong>Student:</strong> {{ submission.student.name }} ({{ submission.student.register_no }})</p>
         <p><strong>Score:</strong> {{ submission.score }}</p>
         <p><strong>Submitted At:</strong> {{ submission.submitted_at }}</p>
+        <p><strong>Flagged:</strong> 
+            {% if submission.flagged %}
+                <span class="text-danger">Yes</span>
+            {% else %}
+                <span class="text-success">No</span>
+            {% endif %}
+        </p>
+        <form method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" name="flag_submission" class="btn btn-warning mb-3">
+                {% if submission.flagged %}Unflag{% else %}Flag{% endif %} Submission
+            </button>
+        </form>
         <a href="{% url 'monitor_exams' %}" class="btn btn-primary mb-3">Back to Exam Monitoring</a>
 
         {% if questions %}

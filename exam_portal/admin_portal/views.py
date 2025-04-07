@@ -57,6 +57,11 @@ def submission_detail(request, submission_id):
     try:
         submission = StudentExamSubmission.objects.get(id=submission_id)
         questions = Question.objects.filter(exam=submission.exam)
+
+        if request.method == 'POST' and 'flag_submission' in request.POST:
+            submission.flagged = not submission.flagged  # Toggle flag
+            submission.save()
+            return redirect('submission_detail', submission_id=submission_id)
         
         # Load student’s registered photos
         student = submission.student
