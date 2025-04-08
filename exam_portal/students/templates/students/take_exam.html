@@ -79,10 +79,9 @@
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            timeLeftInput.value = timeLeft;  // Always update input
-            
+            timeLeftInput.value = timeLeft;
+
             if (timeLeft <= 0) {
-                // Auto-submit with explicit action
                 console.log("Time expired, auto-submitting");
                 const submitInput = document.createElement('input');
                 submitInput.type = 'hidden';
@@ -104,9 +103,8 @@
             submitBtn.disabled = true;
         }
 
-        // Ensure time_left is sent with all form submissions
         examForm.addEventListener('submit', function() {
-            timeLeftInput.value = timeLeft;  // Force update before submit
+            timeLeftInput.value = timeLeft;
             console.log("Form submitting with timeLeft:", timeLeft);
         });
 
@@ -119,8 +117,9 @@
             .then(stream => {
                 console.log("Webcam access granted");
                 video.srcObject = stream;
-                canvas.width = video.width;
-                canvas.height = video.height;
+                canvas.width = video.videoWidth || 200;  // Use actual video dimensions
+                canvas.height = video.videoHeight || 150;
+                startSnapshots();  // Start snapshots after webcam is ready
             })
             .catch(err => {
                 console.error("Webcam access denied:", err);
@@ -141,20 +140,25 @@
                 body: JSON.stringify({ snapshot: snapshot })
             })
             .then(response => {
-                if (!response.ok) throw new Error('Fetch failed');
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 return response.json();
-            })    
+            })
             .then(data => {
                 console.log("Snapshot response:", data);
                 if (data.status === 'error') {
                     alert('Exam terminated: ' + data.message);
                     window.location.href = "{% url 'student_exam_list' %}";
+                } else {
+                    console.log("Snapshots saved so far:", data.snapshots_count);
                 }
             })
             .catch(err => console.error('Snapshot error:', err));
         }
 
-        setInterval(captureSnapshot, 10000); // Every 10 seconds
+        function startSnapshots() {
+            setInterval(captureSnapshot, 5000);
+            console.log("Snapshot interval started (5 seconds)");
+        }
     </script>
 </body>
 </html>

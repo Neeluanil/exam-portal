@@ -26,6 +26,7 @@ class StudentExamSubmission(models.Model):
     answers = JSONField(default=dict)  # Keeps detailed answers (e.g., {"1": {"answer": "A", "marks": 2}})
     snapshots = JSONField(default=list)  # Add this for Base64 snapshots
     flagged = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=False)
     
     class Meta:
         unique_together = ('student', 'exam')  # Prevent re-taking same exam

@@ -1,0 +1,9 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Results Not Yet Published</h2>
+    <p>{{ student.name }}, the results for {{ exam.course }} are not yet available.</p>
+    <p>Please check back later after admin approval.</p>
+    <a href="{% url 'student_exam_list' %}" class="btn btn-primary">Back to Exams</a>
+</div>
+{% endblock %}

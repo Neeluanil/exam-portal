@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Submission Pending{% endblock %}
+{% block content %}
+<h1>Submission Pending</h1>
+<p>Student: {{ student.name }}</p>
+<p>Exam: {{ exam.title }}</p>
+<p>Your submission is pending approval. Please wait for the results.</p>
+<a href="{% url 'student_dashboard' %}">Back to Dashboard</a>
+{% endblock %}
