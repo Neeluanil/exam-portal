@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from .models import Student, StudentExamSubmission
+from .models import Student, StudentExamSubmission, Exam
+from django.contrib.auth import authenticate
 from teachers.models import Teacher, Exam, Question  # Import Exam and Question
 import random
 from django.core.mail import send_mail
@@ -538,12 +539,16 @@ def submit_exam(student, exam, questions, answers, request):
         if submitted_answer == question.correct_answer:
             marks = question.marks_correct
             score += marks
+            logger.info(f"Q{question.id}: Correct, +{marks}, Score: {score}")
         elif submitted_answer:
-            marks = -question.marks_wrong
-            score += marks
+            marks = question.marks_wrong
+            score -= marks
+            detailed_answers[str(question.id)] = {'answer': submitted_answer, 'marks': -marks}  # Store as negative
+            logger.info(f"Q{question.id}: Wrong, -{marks}, Score: {score}")
         else:
             marks = 0
-        detailed_answers[str(question.id)] = {'answer': submitted_answer, 'marks': marks}
+            detailed_answers[str(question.id)] = {'answer': None, 'marks': 0}
+            logger.info(f"Q{question.id}: Unanswered, 0, Score: {score}")
 
     StudentExamSubmission.objects.create(
         student=student,
@@ -626,3 +631,34 @@ def save_snapshot(request, exam_id):
     except Exception as e:
         logger.error(f"Error in save_snapshot for exam {exam_id}: {str(e)}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+def student_result_check(request):
+    if request.method == 'POST':
+        register_no = request.POST.get('register_no')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        if not all([register_no, email, password]):
+            return render(request, 'students/student_result_check.html', {'error': 'All fields are required'})
+
+        try:
+            student = Student.objects.get(register_no=register_no, email=email)
+            user = authenticate(request, username=student.user.username, password=password)
+            if user is not None and user == student.user:
+                submissions = StudentExamSubmission.objects.filter(
+                    student=student,
+                    is_published=True
+                ).select_related('exam')
+                if not submissions:
+                    return render(request, 'students/student_result_check.html', {'error': 'No published results found'})
+                
+                return render(request, 'students/result_list.html', {
+                    'student': student,
+                    'submissions': submissions
+                })
+            else:
+                return render(request, 'students/student_result_check.html', {'error': 'Invalid credentials'})
+        except Student.DoesNotExist:
+            return render(request, 'students/student_result_check.html', {'error': 'Student not found'})
+    
+    return render(request, 'students/student_result_check.html')

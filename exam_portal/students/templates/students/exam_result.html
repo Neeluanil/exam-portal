@@ -8,9 +8,9 @@
 <body>
     <div class="container mt-5">
         <h2>Exam Result</h2>
-        <p><strong>Course:</strong> {{ exam.course }}</p>
-        <p><strong>Department:</strong> {{ exam.department }}</p>
-        <p><strong>Your Score:</strong> {{ score }}</p>
+        <p><strong>Course:</strong> {{ submission.exam.course }}</p>
+        <p><strong>Department:</strong> {{ submission.exam.department }}</p>
+        <p><strong>Your Score:</strong> {{ submission.score }}</p>
         <a href="{% url 'student_exam_list' %}" class="btn btn-primary">Back to Exams</a>
         <a href="{% url 'student_logout' %}" class="btn btn-danger mt-3">Logout</a>
     </div>

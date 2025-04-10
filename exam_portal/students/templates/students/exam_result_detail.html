@@ -29,16 +29,22 @@
                     {% for question in questions %}
                         <tr>
                             <td>{{ question.text }}</td>
-                            <td>{{ submission.answers|get_item:question.id|default:'Not Answered' }}</td>
+                            <td>
+                                {% with answer=submission.answers|get_item:question.id|get_item:'answer' %}
+                                    {{ answer|default:'Not Answered' }}
+                                {% endwith %}
+                            </td>
                             <td>{{ question.correct_answer }}</td>
                             <td>
-                                {% if submission.answers|get_item:question.id|get_item:'answer' == question.correct_answer %}
-                                    <span class="text-success">Correct</span>
-                                {% elif submission.answers|get_item:question.id|get_item:'answer' %}
-                                    <span class="text-danger">Wrong</span>
-                                {% else %}
-                                    <span class="text-muted">Not Answered</span>
-                                {% endif %}
+                                {% with submitted=submission.answers|get_item:question.id|get_item:'answer' %}
+                                    {% if submitted == question.correct_answer %}
+                                        <span class="text-success">Correct</span>
+                                    {% elif submitted %}
+                                        <span class="text-danger">Wrong</span>
+                                    {% else %}
+                                        <span class="text-muted">Not Answered</span>
+                                    {% endif %}
+                                {% endwith %}
                             </td>
                             <td>{{ submission.answers|get_item:question.id|get_item:'marks' }}</td>
                         </tr>
