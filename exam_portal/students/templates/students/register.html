@@ -1,101 +1,339 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'home.html' %}
+
+{% block content %}
     <title>Student Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background-color: #f8f9fa;
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
         }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+        
         .registration-container {
-            max-width: 600px;
+            max-width: 1000px;
+            width: 100%;
             background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        
+        .registration-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .registration-header h2 {
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .registration-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+        
+        .form-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .webcam-section {
+            grid-column: span 2;
+            background: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 2px dashed #dee2e6;
         }
-        #webcamContainer {
-            text-align: center;
-            margin-top: 15px;
+        
+        .webcam-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
         }
+        
+        .webcam-header i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        .webcam-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
         #webcam, #canvas {
             border: 2px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
             max-width: 100%;
-            width: 320px; /* Explicit size for visibility */
+            width: 320px;
             height: 240px;
+            object-fit: cover;
         }
-        .btn-capture {
-            margin: 5px;
+        
+        .webcam-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-info:hover {
+            background-color: #3a7bc8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #4bb543;
+        }
+        
+        .btn-success:hover {
+            background-color: #3fa237;
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn {
+            grid-column: span 2;
+            margin-top: 20px;
+        }
+        
+        .photo-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .photo-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 5px;
+            object-fit: cover;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s;
+        }
+        
+        .photo-thumbnail:hover {
+            transform: scale(1.1);
+            border-color: var(--accent-color);
+        }
+        
+        .alert {
+            border-radius: 8px;
+            grid-column: span 2;
+        }
+        
+        @media (max-width: 768px) {
+            .form-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .submit-btn, .webcam-section, .alert {
+                grid-column: span 1;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="registration-container mx-auto">
-            <h2 class="text-center mb-4">Student Registration</h2>
+    <div class="container">
+        <div class="registration-container">
+            <div class="registration-header">
+                <h2><i class="fas fa-user-graduate me-2"></i>Student Registration</h2>
+                <p class="text-muted">Please fill in all required fields</p>
+            </div>
+            
             {% if error %}
                 <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
+            
             <form method="POST" id="registrationForm" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password1" name="password1" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password2" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="password2" name="password2" required>
-                </div>
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="course" class="form-label">Course</label>
-                    <input type="text" class="form-control" id="course" name="course" required>
-                </div>
-                <div class="mb-3">
-                    <label for="department" class="form-label">Department</label>
-                    <input type="text" class="form-control" id="department" name="department" required>
-                </div>
-                <div class="mb-3">
-                    <label for="register_no" class="form-label">Register Number</label>
-                    <input type="text" class="form-control" id="register_no" name="register_no" required>
-                </div>
-                <div class="mb-3">
-                    <label>Capture Photos:</label>
-                    <div id="webcamContainer">
-                        <video id="webcam" autoplay playsinline></video>
-                        <canvas id="canvas" style="display: none;"></canvas>
+                
+                <div class="form-section">
+                    <!-- Personal Information -->
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required placeholder="Enter your username">
                     </div>
-                    <div class="d-flex justify-content-center mt-2">
-                        <button type="button" id="startWebcamBtn" class="btn btn-info btn-capture">Start Webcam</button>
-                        <button type="button" id="captureBtn1" class="btn btn-secondary btn-capture" disabled>Capture Photo 1</button>
-                        <button type="button" id="captureBtn2" class="btn btn-secondary btn-capture" disabled>Capture Photo 2</button>
-                        <button type="button" id="captureBtn3" class="btn btn-secondary btn-capture" disabled>Capture Photo 3</button>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password1" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password1" name="password1" required placeholder="Create password">
+                            <span class="input-group-text toggle-password" data-target="password1">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password2" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password2" name="password2" required placeholder="Confirm password">
+                            <span class="input-group-text toggle-password" data-target="password2">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Your full name">
+                    </div>
+                    
+                    <!-- Academic Information -->
+                    <div class="form-group">
+                        <label for="course" class="form-label">Course</label>
+                        <input type="text" class="form-control" id="course" name="course" required placeholder="Your course">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department" class="form-label">Department</label>
+                        <input type="text" class="form-control" id="department" name="department" required placeholder="Your department">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register_no" class="form-label">Register Number</label>
+                        <input type="text" class="form-control" id="register_no" name="register_no" required placeholder="Your registration number">
+                    </div>
+                    
+                    <!-- Webcam Section -->
+                    <div class="webcam-section">
+                        <div class="webcam-header">
+                            <i class="fas fa-camera"></i>
+                            <h5 class="mb-0">Facial Recognition Setup</h5>
+                        </div>
+                        
+                        <div class="webcam-content">
+                            <div id="webcamContainer">
+                                <video id="webcam" autoplay playsinline></video>
+                                <canvas id="canvas" style="display: none;"></canvas>
+                            </div>
+                            
+                            <div class="photo-preview" id="photoPreviews">
+                                <!-- Thumbnails will appear here -->
+                            </div>
+                            
+                            <div class="webcam-controls">
+                                <button type="button" id="startWebcamBtn" class="btn btn-info">
+                                    <i class="fas fa-video me-2"></i>Start Webcam
+                                </button>
+                                <button type="button" id="captureBtn1" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-camera me-2"></i>Capture 1
+                                </button>
+                                <button type="button" id="captureBtn2" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-camera me-2"></i>Capture 2
+                                </button>
+                                <button type="button" id="captureBtn3" class="btn btn-secondary" disabled>
+                                    <i class="fas fa-camera me-2"></i>Capture 3
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="photo1Data" name="photo1">
+                    <input type="hidden" id="photo2Data" name="photo2">
+                    <input type="hidden" id="photo3Data" name="photo3">
+                    
+                    <div class="submit-btn">
+                        <button type="submit" class="btn btn-primary w-100 py-3">
+                            <i class="fas fa-user-plus me-2"></i>Complete Registration
+                        </button>
                     </div>
                 </div>
-                <input type="hidden" id="photo1Data" name="photo1">
-                <input type="hidden" id="photo2Data" name="photo2">
-                <input type="hidden" id="photo3Data" name="photo3">
-                <button type="submit" class="btn btn-primary w-100">Register</button>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // DOM Elements
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
         const startWebcamBtn = document.getElementById('startWebcamBtn');
@@ -105,23 +343,52 @@
         const photo1Data = document.getElementById('photo1Data');
         const photo2Data = document.getElementById('photo2Data');
         const photo3Data = document.getElementById('photo3Data');
+        const photoPreviews = document.getElementById('photoPreviews');
         const registrationForm = document.getElementById('registrationForm');
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+        
         let stream = null;
+        let photosTaken = 0;
 
+        // Toggle password visibility
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Webcam functionality
         startWebcamBtn.addEventListener('click', async () => {
             if (!stream) {
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'user' 
+                        } 
+                    });
                     video.srcObject = stream;
                     video.style.display = 'block';
-                    startWebcamBtn.textContent = 'Stop Webcam';
+                    startWebcamBtn.innerHTML = '<i class="fas fa-video-slash me-2"></i>Stop Webcam';
+                    startWebcamBtn.classList.remove('btn-info');
+                    startWebcamBtn.classList.add('btn-danger');
                     enableCaptureButtons();
-                    video.onloadedmetadata = () => {
-                        console.log('Video metadata loaded:', video.videoWidth, video.videoHeight);
-                    };
                 } catch (err) {
                     console.error("Error accessing webcam:", err);
-                    alert('Could not access the webcam: ' + err.message);
+                    alert('Could not access the webcam. Please ensure you have granted camera permissions.');
                 }
             } else {
                 stopWebcam();
@@ -133,15 +400,17 @@
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
                 video.style.display = 'none';
-                startWebcamBtn.textContent = 'Start Webcam';
+                startWebcamBtn.innerHTML = '<i class="fas fa-video me-2"></i>Start Webcam';
+                startWebcamBtn.classList.remove('btn-danger');
+                startWebcamBtn.classList.add('btn-info');
                 disableCaptureButtons();
             }
         }
 
         function enableCaptureButtons() {
-            captureBtn1.disabled = false;
-            captureBtn2.disabled = false;
-            captureBtn3.disabled = false;
+            if (photosTaken < 1) captureBtn1.disabled = false;
+            if (photosTaken < 2) captureBtn2.disabled = false;
+            if (photosTaken < 3) captureBtn3.disabled = false;
         }
 
         function disableCaptureButtons() {
@@ -150,33 +419,71 @@
             captureBtn3.disabled = true;
         }
 
-        function capturePhoto(photoDataField, photoLabel) {
+        function capturePhoto(photoDataField, photoNumber) {
+            if (!stream) return;
+            
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/jpeg');
-            console.log(`${photoLabel} captured, data length: ${imageData.length}`); // Debug
+            
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
             photoDataField.value = imageData;
-            alert(`${photoLabel} captured!`);
-            stopWebcam();
+            photosTaken++;
+            
+            // Create thumbnail preview
+            const thumbnail = document.createElement('img');
+            thumbnail.src = imageData;
+            thumbnail.className = 'photo-thumbnail';
+            thumbnail.alt = `Photo ${photoNumber}`;
+            thumbnail.title = `Photo ${photoNumber}`;
+            photoPreviews.appendChild(thumbnail);
+            
+            // Update UI
+            document.getElementById(`captureBtn${photoNumber}`).innerHTML = 
+                `<i class="fas fa-check me-2"></i>Captured ${photoNumber}`;
+            document.getElementById(`captureBtn${photoNumber}`).classList.remove('btn-secondary');
+            document.getElementById(`captureBtn${photoNumber}`).classList.add('btn-success');
+            document.getElementById(`captureBtn${photoNumber}`).disabled = true;
+            
+            // Flash effect
+            video.style.opacity = '0.5';
+            setTimeout(() => {
+                video.style.opacity = '1';
+            }, 200);
+            
+            // If all photos taken, stop webcam
+            if (photosTaken === 3) {
+                setTimeout(stopWebcam, 1000);
+            }
         }
 
-        captureBtn1.addEventListener('click', () => capturePhoto(photo1Data, 'Photo 1'));
-        captureBtn2.addEventListener('click', () => capturePhoto(photo2Data, 'Photo 2'));
-        captureBtn3.addEventListener('click', () => capturePhoto(photo3Data, 'Photo 3'));
+        // Event listeners for capture buttons
+        captureBtn1.addEventListener('click', () => capturePhoto(photo1Data, 1));
+        captureBtn2.addEventListener('click', () => capturePhoto(photo2Data, 2));
+        captureBtn3.addEventListener('click', () => capturePhoto(photo3Data, 3));
 
+        // Form validation
         registrationForm.addEventListener('submit', (e) => {
             const password1 = document.getElementById('password1').value;
             const password2 = document.getElementById('password2').value;
+            
             if (password1 !== password2) {
                 e.preventDefault();
-                alert('Passwords do not match.');
-            } else if (!photo1Data.value || !photo2Data.value || !photo3Data.value) {
-                e.preventDefault();
-                alert('Please capture all three photos before submitting.');
+                alert('Passwords do not match. Please check and try again.');
+                return;
             }
+            
+            if (!photo1Data.value || !photo2Data.value || !photo3Data.value) {
+                e.preventDefault();
+                alert('Please capture all three facial recognition photos before submitting.');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = registrationForm.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            submitBtn.disabled = true;
         });
     </script>
-</body>
-</html>
+    {% endblock %}

@@ -1,52 +1,231 @@
-{% load exam_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Results - {{ exam.course }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Modern Color Scheme */
+        :root {
+            --primary-blue: #4361ee;
+            --dark-blue: #3a0ca3;
+            --success-green: #4cc9f0;
+            --error-red: #f72585;
+            --light-gray: #f8f9fa;
+            --medium-gray: #e9ecef;
+            --dark-gray: #6c757d;
+        }
+
+        /* Base Styles */
+        body {
+            background-color: #f5f7ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #212529;
+        }
+
+        /* Card Layout */
+        .results-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .results-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Meta Information */
+        .exam-meta {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            display: inline-block;
+        }
+
+        /* Table Styles */
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+        }
+
+        .results-table th {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .results-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .results-table tr:hover {
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        /* Answer Indicators */
+        .correct {
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        .incorrect {
+            color: var(--error-red);
+            font-weight: 500;
+        }
+
+        /* Answer Key Section */
+        .answer-key {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .answer-key h4 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .answer-key-item {
+            display: inline-block;
+            background-color: white;
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--dark-gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--medium-gray);
+            margin-bottom: 1rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            padding: 0.5rem 1.25rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .results-container {
+                margin: 1rem;
+                border-radius: 8px;
+            }
+            
+            .results-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2>Exam Results: {{ exam.course }} - {{ exam.department }}</h2>
-        <p><strong>Time Limit:</strong> {{ exam.time_limit }} minutes</p>
-        <a href="{% url 'teacher_dashboard' %}" class="btn btn-primary mb-3">Back to Dashboard</a>
+    <div class="results-container">
+        <div class="results-header">
+            <h2>
+                <i class="fas fa-file-alt"></i> Exam Results: {{ exam.course }} - {{ exam.department }}
+            </h2>
+        </div>
 
-        {% if results %}
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Register No</th>
-                        <th>Score</th>
-                        {% for question in questions %}
-                            <th>Q{{ forloop.counter }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in results %}
-                        <tr>
-                            <td>{{ result.student.name }}</td>
-                            <td>{{ result.student.register_no }}</td>
-                            <td>{{ result.score }}</td>
-                            {% for question in questions %}
-                                <td>{{ result.answers|get_item:question.id|default:'-' }}</td>
+        <div style="padding: 2rem;">
+            <div class="exam-meta">
+                <i class="fas fa-clock"></i> Time Limit: {{ exam.time_limit }} minutes
+            </div>
+
+            <a href="{% url 'teacher_dashboard' %}" class="btn btn-primary mb-4">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+
+            {% if results %}
+                <div style="overflow-x: auto;">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Register No</th>
+                                <th>Score</th>
+                                {% for question in questions %}
+                                    <th>Q{{ forloop.counter }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                                <tr>
+                                    <td>{{ result.student.name }}</td>
+                                    <td>{{ result.student.register_no }}</td>
+                                    <td><strong>{{ result.score }}</strong></td>
+                                    {% for question in questions %}
+                                        <td class="{% if question.id in result.answers and result.answers.question.id == question.correct_answer %}correct{% elif question.id in result.answers %}incorrect{% endif %}">
+                                            {{ result.answers.question.id|default:'-' }}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
                             {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <h4>Correct Answers</h4>
-            <ul class="list-group">
-                {% for question in questions %}
-                    <li class="list-group-item">Q{{ forloop.counter }}: {{ question.correct_answer }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No students have submitted this exam yet.</p>
-        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="answer-key">
+                    <h4><i class="fas fa-key"></i> Correct Answers</h4>
+                    <div>
+                        {% for question in questions %}
+                            <div class="answer-key-item">
+                                <strong>Q{{ forloop.counter }}:</strong> {{ question.correct_answer }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No Results Available</h3>
+                    <p>No students have submitted this exam yet.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

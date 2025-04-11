@@ -1,20 +1,195 @@
-<!-- exam_portal/templates/students/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #28a745;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 800px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin: 40px auto;
+            overflow: hidden;
+            animation: fadeInUp 0.6s;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .dashboard-header h2 {
+            font-weight: 700;
+            margin-bottom: 10px;
+            animation: fadeIn 1s;
+        }
+        
+        .dashboard-body {
+            padding: 30px;
+        }
+        
+        .student-info-card {
+            background: var(--light-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .student-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-item i {
+            width: 30px;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 200px;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                margin: 20px auto;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Welcome, {{ student.name }}!</h2>
-        <p>Course: {{ student.course }}</p>
-        <p>Department: {{ student.department }}</p>
-        <p>Register Number: {{ student.register_no }}</p>
-        <a href="{% url 'student_exam_list' %}" class="btn btn-primary mt-3">View Available Exams</a>
-        <a href="{% url 'student_login' %}" class="btn btn-danger">Logout</a>
+    <div class="dashboard-container animate__animated animate__fadeInUp">
+        <div class="dashboard-header">
+            <h2 class="animate__animated animate__fadeIn">Welcome, {{ student.name }}!</h2>
+        </div>
+        
+        <div class="dashboard-body">
+            <div class="student-info-card animate__animated animate__fadeIn animate__delay-1s">
+                <div class="info-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Course: <strong>{{ student.course }}</strong></span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-university"></i>
+                    <span>Department: <strong>{{ student.department }}</strong></span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-id-card"></i>
+                    <span>Register Number: <strong>{{ student.register_no }}</strong></span>
+                </div>
+            </div>
+            
+            <div class="action-buttons animate__animated animate__fadeIn animate__delay-2s">
+                <a href="{% url 'student_exam_list' %}" class="btn btn-primary">
+                    <i class="fas fa-clipboard-list"></i> View Available Exams
+                </a>
+                <a href="{% url 'student_login' %}" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add hover effects dynamically
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,73 +1,318 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'home.html' %}
+
+{% block content %}
     <title>Teacher Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .login-container { max-width: 500px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        #webcamContainer { text-align: center; margin-top: 15px; }
-        #webcam, #canvas { border: 2px solid #ddd; border-radius: 5px; width: 320px; height: 240px; }
-        .btn-capture { margin: 5px; }
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            position: relative;
+        }
+        
+        .login-header h2 {
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .login-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .webcam-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .webcam-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .webcam-header i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        #webcamContainer {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        #webcam, #canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 320px;
+            height: 240px;
+            object-fit: cover;
+        }
+        
+        .webcam-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background-color: #3a7bc8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #4bb543;
+            color: white;
+        }
+        
+        .photo-preview {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .photo-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 2px solid #dee2e6;
+        }
+        
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .password-toggle:hover {
+            color: var(--accent-color);
+        }
+        
+        .input-group {
+            position: relative;
+        }
     </style>
-</head>
-<body>
-    <div class="container mt-5">
+
+    <div class="container">
         <div class="login-container mx-auto">
-            <h2 class="text-center mb-4">Teacher Login</h2>
+            <div class="login-header">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Teacher Login</h2>
+            </div>
+            
             {% if error %}
                 <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
+            
             <form method="POST" id="loginForm" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="mb-3">
+                
+                <div class="form-group">
                     <label for="teacher_id" class="form-label">Teacher ID</label>
-                    <input type="text" class="form-control" id="teacher_id" name="teacher_id" required>
+                    <input type="text" class="form-control" id="teacher_id" name="teacher_id" required placeholder="Enter your teacher ID">
                 </div>
-                <div class="mb-3">
+                
+                <div class="form-group">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
+                        <span class="password-toggle" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label>Capture Face for Verification:</label>
+                
+                <div class="webcam-section">
+                    <div class="webcam-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h5 class="mb-0">Facial Verification</h5>
+                    </div>
+                    
                     <div id="webcamContainer">
                         <video id="webcam" autoplay playsinline></video>
                         <canvas id="canvas" style="display: none;"></canvas>
                     </div>
-                    <div class="d-flex justify-content-center mt-2">
-                        <button type="button" id="startWebcamBtn" class="btn btn-info btn-capture">Start Webcam</button>
-                        <button type="button" id="captureBtn" class="btn btn-secondary btn-capture" disabled>Capture Photo</button>
+                    
+                    <div class="photo-preview" id="photoPreviews"></div>
+                    
+                    <div class="webcam-controls">
+                        <button type="button" id="startWebcamBtn" class="btn btn-info">
+                            <i class="fas fa-video"></i> Start Webcam
+                        </button>
+                        <button type="button" id="captureBtn" class="btn btn-secondary" disabled>
+                            <i class="fas fa-camera"></i> Capture
+                        </button>
                     </div>
                 </div>
+                
                 <input type="hidden" id="photoData" name="photo">
-                <button type="submit" class="btn btn-primary w-100">Login</button>
+                
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // DOM Elements
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
         const startWebcamBtn = document.getElementById('startWebcamBtn');
         const captureBtn = document.getElementById('captureBtn');
         const photoData = document.getElementById('photoData');
+        const photoPreviews = document.getElementById('photoPreviews');
         const loginForm = document.getElementById('loginForm');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('password');
         let stream = null;
+        let photoTaken = false;
 
+        // Toggle password visibility
+        togglePassword.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Webcam functionality
         startWebcamBtn.addEventListener('click', async () => {
             if (!stream) {
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'user' 
+                        } 
+                    });
                     video.srcObject = stream;
-                    video.style.display = 'block';
-                    startWebcamBtn.textContent = 'Stop Webcam';
+                    startWebcamBtn.innerHTML = '<i class="fas fa-video-slash"></i> Stop Webcam';
+                    startWebcamBtn.classList.remove('btn-info');
+                    startWebcamBtn.classList.add('btn-danger');
                     captureBtn.disabled = false;
                 } catch (err) {
                     console.error("Error accessing webcam:", err);
-                    alert('Could not access the webcam: ' + err.message);
+                    alert('Could not access the webcam. Please ensure you have granted camera permissions.');
                 }
             } else {
                 stopWebcam();
@@ -78,33 +323,57 @@
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
-                video.style.display = 'none';
-                startWebcamBtn.textContent = 'Start Webcam';
-                captureBtn.disabled = true;
+                startWebcamBtn.innerHTML = '<i class="fas fa-video"></i> Start Webcam';
+                startWebcamBtn.classList.remove('btn-danger');
+                startWebcamBtn.classList.add('btn-info');
+                if (!photoTaken) {
+                    captureBtn.disabled = true;
+                }
             }
         }
 
         captureBtn.addEventListener('click', () => {
+            if (!stream) return;
+            
             const context = canvas.getContext('2d');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            if (video.videoWidth > 0 && video.videoHeight > 0) {
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageData = canvas.toDataURL('image/jpeg');
-                photoData.value = imageData;
-                alert('Photo captured!');
-                stopWebcam();
-            } else {
-                alert('Webcam not ready. Please try again.');
-            }
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            photoData.value = imageData;
+            photoTaken = true;
+            
+            // Create thumbnail preview
+            photoPreviews.innerHTML = '';
+            const thumbnail = document.createElement('img');
+            thumbnail.src = imageData;
+            thumbnail.className = 'photo-thumbnail';
+            thumbnail.alt = 'Verification Photo';
+            photoPreviews.appendChild(thumbnail);
+            
+            // Update UI
+            captureBtn.innerHTML = '<i class="fas fa-check"></i> Captured';
+            captureBtn.classList.remove('btn-secondary');
+            captureBtn.classList.add('btn-success');
+            captureBtn.disabled = true;
+            
+            // Stop webcam after capture
+            setTimeout(stopWebcam, 500);
         });
 
+        // Form validation
         loginForm.addEventListener('submit', (e) => {
             if (!photoData.value) {
                 e.preventDefault();
-                alert('Please capture a photo for facial recognition.');
+                alert('Please capture a photo for facial verification.');
+                return;
             }
+            
+            // Show loading state
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            submitBtn.disabled = true;
         });
     </script>
-</body>
-</html>
+{% endblock %}

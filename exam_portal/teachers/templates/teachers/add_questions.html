@@ -2,68 +2,380 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add Questions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Questions | {{ exam }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .question-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .page-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        
+        .page-header::after {
+            content: "";
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            margin: 1rem auto 0;
+            border-radius: 2px;
+        }
+        
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-label i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .answer-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 576px) {
+            .answer-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .btn-add {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-back {
+            background-color: #6c757d;
+            border: none;
+            padding: 0.75rem;
+            font-weight: 500;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-back:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+        }
+        
+        .questions-list {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+        }
+        
+        .question-item {
+            padding: 1.25rem;
+            border-left: 4px solid var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .question-item:hover {
+            transform: translateX(5px);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .correct-answer {
+            color: var(--success-color);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .correct-answer i {
+            margin-right: 0.5rem;
+        }
+        
+        .no-questions {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .no-questions i {
+            font-size: 3rem;
+            color: #adb5bd;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .alert-danger i {
+            margin-right: 0.5rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Add Questions to {{ exam }}</h2>
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
-        <form method="POST">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="text" class="form-label">Question Text</label>
-                <textarea class="form-control" id="text" name="text" required></textarea>
+    <div class="container question-container">
+        <div class="question-card">
+            <div class="page-header">
+                <h2><i class="fas fa-question-circle"></i> Add Questions to {{ exam }}</h2>
             </div>
-            <div class="mb-3">
-                <label for="option_a" class="form-label">Option A</label>
-                <input type="text" class="form-control" id="option_a" name="option_a" required>
-            </div>
-            <div class="mb-3">
-                <label for="option_b" class="form-label">Option B</label>
-                <input type="text" class="form-control" id="option_b" name="option_b" required>
-            </div>
-            <div class="mb-3">
-                <label for="option_c" class="form-label">Option C</label>
-                <input type="text" class="form-control" id="option_c" name="option_c" required>
-            </div>
-            <div class="mb-3">
-                <label for="option_d" class="form-label">Option D</label>
-                <input type="text" class="form-control" id="option_d" name="option_d" required>
-            </div>
-            <div class="mb-3">
-                <label for="correct_answer" class="form-label">Correct Answer</label>
-                <select class="form-control" id="correct_answer" name="correct_answer" required>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="marks_correct" class="form-label">Marks for Correct Answer</label>
-                <input type="number" class="form-control" id="marks_correct" name="marks_correct" value="1" required>
-            </div>
-            <div class="mb-3">
-                <label for="marks_wrong" class="form-label">Marks for Wrong Answer</label>
-                <input type="number" class="form-control" id="marks_wrong" name="marks_wrong" value="0" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Add Question</button>
-        </form>
-        <h3 class="mt-4">Existing Questions</h3>
-        {% if questions %}
-            <ul class="list-group">
+            
+            {% if error %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>{{ error }}
+                </div>
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-section">
+                    <label for="text" class="form-label">
+                        <i class="fas fa-paragraph"></i>Question Text
+                    </label>
+                    <textarea class="form-control" id="text" name="text" required placeholder="Enter your question here..."></textarea>
+                </div>
+                
+                <div class="options-grid">
+                    <div class="form-group">
+                        <label for="option_a" class="form-label">
+                            <i class="fas fa-circle-a"></i>Option A
+                        </label>
+                        <input type="text" class="form-control" id="option_a" name="option_a" required placeholder="Enter option A">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_b" class="form-label">
+                            <i class="fas fa-circle-b"></i>Option B
+                        </label>
+                        <input type="text" class="form-control" id="option_b" name="option_b" required placeholder="Enter option B">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_c" class="form-label">
+                            <i class="fas fa-circle-c"></i>Option C
+                        </label>
+                        <input type="text" class="form-control" id="option_c" name="option_c" required placeholder="Enter option C">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option_d" class="form-label">
+                            <i class="fas fa-circle-d"></i>Option D
+                        </label>
+                        <input type="text" class="form-control" id="option_d" name="option_d" required placeholder="Enter option D">
+                    </div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="form-group">
+                        <label for="correct_answer" class="form-label">
+                            <i class="fas fa-check-circle"></i>Correct Answer
+                        </label>
+                        <select class="form-control" id="correct_answer" name="correct_answer" required>
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="marks_correct" class="form-label">
+                            <i class="fas fa-plus-circle"></i>Marks for Correct
+                        </label>
+                        <input type="number" class="form-control" id="marks_correct" name="marks_correct" value="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="marks_wrong" class="form-label">
+                            <i class="fas fa-minus-circle"></i>Marks for Wrong
+                        </label>
+                        <input type="number" class="form-control" id="marks_wrong" name="marks_wrong" value="0" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-add">
+                    <i class="fas fa-plus-circle me-2"></i>Add Question
+                </button>
+            </form>
+            
+            <a href="{% url 'teacher_dashboard' %}" class="btn btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="questions-list">
+            <h3 class="section-title">
+                <i class="fas fa-list-ul"></i>Existing Questions
+            </h3>
+            
+            {% if questions %}
                 {% for question in questions %}
-                    <li class="list-group-item">{{ question.text }} (Correct: {{ question.correct_answer }})</li>
+                    <div class="question-item">
+                        <div class="question-text">{{ question.text }}</div>
+                        <div class="correct-answer">
+                            <i class="fas fa-check"></i>Correct Answer: {{ question.correct_answer }}
+                        </div>
+                    </div>
                 {% endfor %}
-            </ul>
-        {% else %}
-            <p>No questions added yet.</p>
-        {% endif %}
-        <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+            {% else %}
+                <div class="no-questions">
+                    <i class="fas fa-inbox"></i>
+                    <h5>No Questions Added Yet</h5>
+                    <p>Start by adding your first question above</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animation for form elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const formGroups = document.querySelectorAll('.form-group');
+            formGroups.forEach((group, index) => {
+                group.style.opacity = '0';
+                group.style.transform = 'translateY(20px)';
+                group.style.transition = `all 0.3s ease ${index * 0.1}s`;
+                
+                setTimeout(() => {
+                    group.style.opacity = '1';
+                    group.style.transform = 'translateY(0)';
+                }, 100);
+            });
+            
+            // Animation for existing questions
+            const questionItems = document.querySelectorAll('.question-item');
+            questionItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-20px)';
+                item.style.transition = `all 0.3s ease ${index * 0.1}s`;
+                
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateX(0)';
+                }, 150);
+            });
+        });
+    </script>
 </body>
 </html>
