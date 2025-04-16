@@ -1,145 +1,163 @@
 {% extends 'home.html' %}
 
 {% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --accent-color: #4895ef;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #4cc9f0;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #1f2d5a;
+            --gray: #6c757d;
         }
         
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #e6f0ff 100%);
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             padding: 20px;
         }
         
-        .registration-container {
-            max-width: 700px;
+        .registration-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            max-width: 800px;
             width: 100%;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
             margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+        
+        .registration-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
         
         .registration-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 25px;
             text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
             position: relative;
         }
         
         .registration-header h2 {
             font-weight: 700;
+            margin: 0;
             position: relative;
             display: inline-block;
-            padding-bottom: 10px;
         }
         
         .registration-header h2::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 60px;
             height: 3px;
-            background: var(--accent-color);
+            background: var(--secondary);
             border-radius: 3px;
         }
         
-        .form-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .registration-body {
+            padding: 30px;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .form-label {
             font-weight: 600;
-            color: var(--dark-color);
+            color: var(--dark);
             margin-bottom: 8px;
             display: block;
         }
         
         .form-control {
             border: 2px solid #e9ecef;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 12px 15px;
-            width: 100%;
             transition: all 0.3s;
         }
         
         .form-control:focus {
-            border-color: var(--accent-color);
+            border-color: var(--primary);
             box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
         }
         
         .webcam-section {
-            grid-column: span 2;
-            background: #f8f9fa;
+            background: rgba(248, 249, 250, 0.7);
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 10px;
-            border: 2px dashed #dee2e6;
-            margin-bottom: 15px;
+            border: 2px dashed rgba(0, 0, 0, 0.1);
+            margin: 25px 0;
+            text-align: center;
         }
         
         .webcam-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             margin-bottom: 15px;
         }
         
         .webcam-header i {
             margin-right: 10px;
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-        
-        .webcam-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            color: var(--primary);
+            font-size: 1.3rem;
         }
         
         #webcam, #canvas {
+            border-radius: 10px;
             border: 2px solid #ddd;
-            border-radius: 8px;
-            width: 320px;
-            height: 240px;
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 4/3;
             object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        #webcam:hover, #canvas:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
         
         .webcam-controls {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+            margin-top: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .btn {
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 10px 20px;
             font-weight: 600;
             transition: all 0.3s;
-            border: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
         .btn i {
@@ -147,126 +165,139 @@
         }
         
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
         }
         
         .btn-info {
-            background-color: var(--accent-color);
+            background: linear-gradient(135deg, var(--secondary), #3a7bc8);
             color: white;
         }
         
         .btn-info:hover {
-            background-color: #3a7bc8;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 201, 240, 0.3);
         }
         
-        .btn-success {
-            background-color: #4bb543;
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
             color: white;
         }
         
-        .photo-preview {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
         }
         
-        .photo-thumbnail {
-            width: 80px;
-            height: 60px;
-            border-radius: 5px;
-            object-fit: cover;
-            border: 2px solid #dee2e6;
-            transition: all 0.3s;
+        .btn-success {
+            background: linear-gradient(135deg, #4bb543, #3a9e32);
+            color: white;
         }
         
-        .photo-thumbnail:hover {
-            transform: scale(1.1);
-            border-color: var(--accent-color);
-        }
-        
-        .submit-btn {
-            grid-column: span 2;
-            margin-top: 20px;
-        }
-        
-        .alert {
+        .alert-danger {
+            background-color: rgba(247, 37, 133, 0.1);
+            border-left: 4px solid var(--accent);
+            color: var(--accent);
             border-radius: 8px;
-            grid-column: span 2;
         }
         
         @media (max-width: 768px) {
-            .form-section {
-                grid-template-columns: 1fr;
+            .registration-body {
+                padding: 20px;
             }
             
-            .submit-btn, .webcam-section, .alert {
-                grid-column: span 1;
+            .webcam-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
             }
         }
     </style>
-
+</head>
+<body>
     <div class="container">
-        <div class="registration-container">
+        <div class="registration-card">
             <div class="registration-header">
-                <h2><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Registration</h2>
+                <h2><i class="fas fa-chalkboard-teacher"></i> Teacher Registration</h2>
             </div>
             
-            {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-            {% endif %}
-            
-            <form method="POST" id="registrationForm" enctype="multipart/form-data">
-                {% csrf_token %}
+            <div class="registration-body">
+                {% if error %}
+                    <div class="alert alert-danger mb-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                    </div>
+                {% endif %}
                 
-                <div class="form-section">
-                    <div class="form-group">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required placeholder="Choose a username">
+                <form method="POST" id="registrationForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required placeholder="Your email address">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="password1" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password1" name="password1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="password2" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="password2" name="password2" required>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="password1" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password1" name="password1" required placeholder="Create password">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="department" class="form-label">Department</label>
+                                <input type="text" class="form-control" id="department" name="department" required>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="password2" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="password2" name="password2" required placeholder="Confirm password">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="name" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required placeholder="Your full name">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="department" class="form-label">Department</label>
-                        <input type="text" class="form-control" id="department" name="department" required placeholder="Your department">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="course" class="form-label">Course</label>
+                                <input type="text" class="form-control" id="course" name="course" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="teacher_id" class="form-label">Teacher ID</label>
+                                <input type="text" class="form-control" id="teacher_id" name="teacher_id" required>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="webcam-section">
@@ -275,30 +306,24 @@
                             <h5 class="mb-0">Facial Recognition Setup</h5>
                         </div>
                         
-                        <div class="webcam-content">
-                            <div id="webcamContainer">
-                                <video id="webcam" autoplay playsinline></video>
-                                <canvas id="canvas" style="display: none;"></canvas>
-                            </div>
-                            
-                            <div class="photo-preview" id="photoPreviews">
-                                <!-- Thumbnails will appear here -->
-                            </div>
-                            
-                            <div class="webcam-controls">
-                                <button type="button" id="startWebcamBtn" class="btn btn-info">
-                                    <i class="fas fa-video me-2"></i>Start Webcam
-                                </button>
-                                <button type="button" id="captureBtn1" class="btn btn-secondary" disabled>
-                                    <i class="fas fa-camera me-2"></i>Capture Photo 1
-                                </button>
-                                <button type="button" id="captureBtn2" class="btn btn-secondary" disabled>
-                                    <i class="fas fa-camera me-2"></i>Capture Photo 2
-                                </button>
-                                <button type="button" id="captureBtn3" class="btn btn-secondary" disabled>
-                                    <i class="fas fa-camera me-2"></i>Capture Photo 3
-                                </button>
-                            </div>
+                        <div id="webcamContainer">
+                            <video id="webcam" autoplay playsinline></video>
+                            <canvas id="canvas" style="display: none;"></canvas>
+                        </div>
+                        
+                        <div class="webcam-controls">
+                            <button type="button" id="startWebcamBtn" class="btn btn-info">
+                                <i class="fas fa-video"></i> Start Webcam
+                            </button>
+                            <button type="button" id="captureBtn1" class="btn btn-secondary" disabled>
+                                <i class="fas fa-camera"></i> Photo 1
+                            </button>
+                            <button type="button" id="captureBtn2" class="btn btn-secondary" disabled>
+                                <i class="fas fa-camera"></i> Photo 2
+                            </button>
+                            <button type="button" id="captureBtn3" class="btn btn-secondary" disabled>
+                                <i class="fas fa-camera"></i> Photo 3
+                            </button>
                         </div>
                     </div>
                     
@@ -306,19 +331,16 @@
                     <input type="hidden" id="photo2Data" name="photo2">
                     <input type="hidden" id="photo3Data" name="photo3">
                     
-                    <div class="submit-btn">
-                        <button type="submit" class="btn btn-primary w-100 py-3">
-                            <i class="fas fa-user-plus me-2"></i>Complete Registration
-                        </button>
-                    </div>
-                </div>
-            </form>
+                    <button type="submit" class="btn btn-primary w-100 py-3 mt-3">
+                        <i class="fas fa-user-plus"></i> Complete Registration
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // DOM Elements
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
         const startWebcamBtn = document.getElementById('startWebcamBtn');
@@ -328,12 +350,10 @@
         const photo1Data = document.getElementById('photo1Data');
         const photo2Data = document.getElementById('photo2Data');
         const photo3Data = document.getElementById('photo3Data');
-        const photoPreviews = document.getElementById('photoPreviews');
         const registrationForm = document.getElementById('registrationForm');
         let stream = null;
         let photosTaken = 0;
 
-        // Webcam functionality
         startWebcamBtn.addEventListener('click', async () => {
             if (!stream) {
                 try {
@@ -346,7 +366,7 @@
                     });
                     video.srcObject = stream;
                     video.style.display = 'block';
-                    startWebcamBtn.innerHTML = '<i class="fas fa-video-slash me-2"></i>Stop Webcam';
+                    startWebcamBtn.innerHTML = '<i class="fas fa-video-slash"></i> Stop Webcam';
                     startWebcamBtn.classList.remove('btn-info');
                     startWebcamBtn.classList.add('btn-danger');
                     enableCaptureButtons();
@@ -364,7 +384,7 @@
                 stream.getTracks().forEach(track => track.stop());
                 stream = null;
                 video.style.display = 'none';
-                startWebcamBtn.innerHTML = '<i class="fas fa-video me-2"></i>Start Webcam';
+                startWebcamBtn.innerHTML = '<i class="fas fa-video"></i> Start Webcam';
                 startWebcamBtn.classList.remove('btn-danger');
                 startWebcamBtn.classList.add('btn-info');
                 disableCaptureButtons();
@@ -395,22 +415,14 @@
             photoDataField.value = imageData;
             photosTaken++;
             
-            // Create thumbnail preview
-            const thumbnail = document.createElement('img');
-            thumbnail.src = imageData;
-            thumbnail.className = 'photo-thumbnail';
-            thumbnail.alt = `Photo ${photoNumber}`;
-            thumbnail.title = `Photo ${photoNumber}`;
-            photoPreviews.appendChild(thumbnail);
-            
-            // Update UI
+            // Update button appearance
             document.getElementById(`captureBtn${photoNumber}`).innerHTML = 
-                `<i class="fas fa-check me-2"></i>Captured ${photoNumber}`;
+                `<i class="fas fa-check"></i> Captured ${photoNumber}`;
             document.getElementById(`captureBtn${photoNumber}`).classList.remove('btn-secondary');
             document.getElementById(`captureBtn${photoNumber}`).classList.add('btn-success');
             document.getElementById(`captureBtn${photoNumber}`).disabled = true;
             
-            // Flash effect
+            // Visual feedback
             video.style.opacity = '0.5';
             setTimeout(() => {
                 video.style.opacity = '1';
@@ -422,12 +434,10 @@
             }
         }
 
-        // Event listeners for capture buttons
         captureBtn1.addEventListener('click', () => capturePhoto(photo1Data, 1));
         captureBtn2.addEventListener('click', () => capturePhoto(photo2Data, 2));
         captureBtn3.addEventListener('click', () => capturePhoto(photo3Data, 3));
 
-        // Form validation
         registrationForm.addEventListener('submit', (e) => {
             const password1 = document.getElementById('password1').value;
             const password2 = document.getElementById('password2').value;
@@ -446,8 +456,10 @@
             
             // Show loading state
             const submitBtn = registrationForm.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitBtn.disabled = true;
         });
     </script>
+</body>
+</html>
 {% endblock %}
